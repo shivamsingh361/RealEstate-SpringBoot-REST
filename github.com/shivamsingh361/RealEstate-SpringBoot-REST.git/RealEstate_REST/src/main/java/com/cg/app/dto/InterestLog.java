@@ -1,16 +1,11 @@
 package com.cg.app.dto;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
-
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 /* DB Schema:
  * 
@@ -32,28 +27,29 @@ public class InterestLog{
 	 * sdf.format(dt);
 	 */
 	@Id
-	@Basic(optional = false)
-	@Column(name = "timestamp", insertable = false, updatable = false)
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date timestamp;
+	@GeneratedValue(strategy=GenerationType.AUTO) 
+	@Column(name = "id")
+	private long id;
+	@Column(name = "time_stamp")
+	private String timestamp;
 	@Column(name="intrested_city")
 	private String city;
 	@Column(name="prop_id")
 	private int propId;
-	public InterestLog(String userId, Date timestamp, String city, int propId) {
+	public InterestLog(String userId, String timestamp, String city, int propId) {
 		super();
 		this.userId = userId;
 		this.timestamp = timestamp;
 		this.city = city;
 		this.propId = propId;
 	}
-	public InterestLog(String userId, String city, int propId) {
-		super();
-		this.userId = userId;
-		this.timestamp = Date.from( LocalDateTime.now().atZone( ZoneId.systemDefault()).toInstant());
-		this.city = city;
-		this.propId = propId;
-	}
+
+	/*
+	 * public InterestLog(String userId, String city, int propId) { super();
+	 * this.userId = userId; this.timestamp = Date.from( LocalDateTime.now().atZone(
+	 * ZoneId.systemDefault()).toInstant()); this.city = city; this.propId = propId;
+	 * }
+	 */
 	public InterestLog() {
 		super();
 	}
@@ -63,10 +59,10 @@ public class InterestLog{
 	public void setUserId(String userId) {
 		this.userId = userId;
 	}
-	public Date getTimestamp() {
+	public String getTimestamp() {
 		return timestamp;
 	}
-	public void setTimestamp(Date timestamp) {
+	public void setTimestamp(String timestamp) {
 		this.timestamp = timestamp;
 	}
 	public String getCity() {

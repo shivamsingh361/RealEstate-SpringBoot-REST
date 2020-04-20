@@ -1,15 +1,21 @@
 package com.cg.app.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.cg.app.dto.InterestLog;
@@ -28,62 +34,76 @@ public class RealEstateRestControllerApp {
 	private UserService userService;
 	@Autowired
 	private PropertyService propertyService;
-
-	@PostMapping("/delete")
-	void deleteUser(@RequestBody String userId) {
+	
+	@CrossOrigin(origins = "http://localhost:4200")
+	@PostMapping("/deleteUser/{userId}")
+	void deleteUser(@PathVariable("userId") String userId) {
+		System.out.println("Deleting this User: "+userId);
 		userService.deleteUser(userId);
 	}
 
+	@CrossOrigin(origins = "http://localhost:4200")
 	@PostMapping("/updateuser")
 	User updateUser(@RequestBody User updateUser) {
 		return userService.addUser(updateUser);
 	}
-
+	
+	@CrossOrigin(origins = "http://localhost:4200")
 	@PostMapping("/register")
 	User newUser(@RequestBody User newUser) {
 		return userService.addUser(newUser);
 	}
 
+	@CrossOrigin(origins = "http://localhost:4200")
 	@GetMapping(path = "/alluserids")
 	public @ResponseBody Iterable<String> getAllUserIds() {
 		return userService.getAllUserIds();
 	}
-
+	
+	@CrossOrigin(origins = "http://localhost:4200")
 	@PostMapping(path = "/login")
-	@ResponseBody User checkCredentials(@RequestBody String userId, @RequestBody String pass) {
-		return userService.checkCredentials(userId, pass);
+	@ResponseBody User checkCredentials(@NonNull @RequestBody  Map<String, String> obj) {
+		System.out.println("Gout Object"+obj.get("userId"));
+		return userService.checkCredentials(obj.get("userId"), obj.get("pass"));
 	}
-
+	
+	@CrossOrigin(origins = "http://localhost:4200")
 	@GetMapping(path = "/allproperties")
 	public @ResponseBody Iterable<Property> getAllPropertyList() {
 		return propertyService.getAllProperty();
 	}
-
-	@GetMapping(value= "/getpropertybyid")
+	
+	@CrossOrigin(origins = "http://localhost:4200")
+	@GetMapping(value= "/getproperty/{propId}")
 	public @ResponseBody Optional<Property> getPropertyById(@PathVariable("propId") String id) {
 		return propertyService.getPropertyById(Integer.parseInt(id));
 	}
 
-	@GetMapping(value= "/getpropertybytype")
+	@CrossOrigin(origins = "http://localhost:4200")
+	@GetMapping(value= "/getpropertybytype/{propType}")
 	public @ResponseBody List<Property> getPropertyByPropType(@PathVariable("propType") String propType) {
 		return propertyService.getPropertyByType(propType);
 	}
 
+	@CrossOrigin(origins = "http://localhost:4200")
 	@PostMapping("/addproperty")
 	Property newProperty(@RequestBody Property newProperty) {
 		return propertyService.addProperty(newProperty);
 	}
 
-	@PostMapping("/deleteproperty")
-	public void deleteProperty(@RequestBody int propId) {
+	@CrossOrigin(origins = "http://localhost:4200")
+	@PostMapping("/deleteproperty/{propId}")
+	public void deleteProperty(@PathVariable("propId") int propId) {
 		propertyService.deleteProperty(propId);
 	}
 
+	@CrossOrigin(origins = "http://localhost:4200")
 	@PostMapping("/addinterest")
 	public void addInterest(@RequestBody InterestLog interest) {
 		userService.addInterest(interest);
 	}
 
+	@CrossOrigin(origins = "http://localhost:4200")
 	@GetMapping(path = "/allinterest")
 	public @ResponseBody Iterable<InterestLog> getAllInterestList() {
 		return userService.getInterestLists();
