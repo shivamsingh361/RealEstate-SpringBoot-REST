@@ -3,9 +3,9 @@ package com.cg.app.services;
 import java.util.List;
 import java.util.Optional;
 
-import javax.xml.bind.PropertyException;
 
 import com.cg.app.dto.Property;
+import com.cg.app.exceptions.PropertyException;
 
 public interface PropertyService {
 	Property addProperty(Property prop) throws PropertyException;
