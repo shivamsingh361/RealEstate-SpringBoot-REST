@@ -4,23 +4,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.xml.bind.PropertyException;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.cg.app.dto.InterestLog;
 import com.cg.app.dto.Property;
 import com.cg.app.dto.User;
+import com.cg.app.exceptions.UserException;
 import com.cg.app.services.PropertyService;
 import com.cg.app.services.UserService;
 
@@ -35,74 +43,160 @@ public class RealEstateRestControllerApp {
 	@Autowired
 	private PropertyService propertyService;
 	
+	
 	@CrossOrigin(origins = "http://localhost:4200")
 	@PostMapping("/deleteUser/{userId}")
-	void deleteUser(@PathVariable("userId") String userId) {
-		System.out.println("Deleting this User: "+userId);
-		userService.deleteUser(userId);
+	public ResponseEntity<Object> deleteUser(@PathVariable("userId") String userId) {		
+		try {
+			userService.deleteUser(userId);
+			 return new ResponseEntity<Object>(
+			         "User Deleted!", HttpStatus.ACCEPTED);
+		} catch (Exception e) {
+			 return new ResponseEntity<Object>(
+					 "Invalid Request!" , HttpStatus.BAD_REQUEST);
+		}
 	}
 
+	
 	@CrossOrigin(origins = "http://localhost:4200")
 	@PostMapping("/updateuser")
-	User updateUser(@RequestBody User updateUser) {
-		return userService.addUser(updateUser);
+	public ResponseEntity<Object> updateUser(@RequestBody User updateUser) {
+		try {
+			User user = userService.addUser(updateUser);
+			 return new ResponseEntity<Object>(
+			         user, HttpStatus.ACCEPTED);
+		} catch (Exception e) {
+			 return new ResponseEntity<Object>(
+					 null , HttpStatus.BAD_REQUEST);
+		}
 	}
+	
 	
 	@CrossOrigin(origins = "http://localhost:4200")
 	@PostMapping("/register")
-	User newUser(@RequestBody User newUser) {
-		return userService.addUser(newUser);
+	public ResponseEntity<Object> newUser(@RequestBody User newUser) {
+		try {
+			User user = userService.addUser(newUser);
+			 return new ResponseEntity<Object>(
+			         user, HttpStatus.CREATED);
+		} catch (Exception e) {
+			 return new ResponseEntity<Object>(
+					 null , HttpStatus.BAD_REQUEST);
+		}
 	}
 
+	
 	@CrossOrigin(origins = "http://localhost:4200")
 	@GetMapping(path = "/alluserids")
 	public @ResponseBody Iterable<String> getAllUserIds() {
-		return userService.getAllUserIds();
+		try {
+			return userService.getAllUserIds();
+		} catch (UserException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
+	
 	
 	@CrossOrigin(origins = "http://localhost:4200")
 	@PostMapping(path = "/login")
-	@ResponseBody User checkCredentials(@NonNull @RequestBody  Map<String, String> obj) {
-		System.out.println("Gout Object"+obj.get("userId"));
-		return userService.checkCredentials(obj.get("userId"), obj.get("pass"));
+	public ResponseEntity<Object> checkCredentials(@NonNull @RequestBody  Map<String, String> obj) {
+		try {
+			User user =  userService.checkCredentials(obj.get("userId"), obj.get("pass"));
+			 return new ResponseEntity<Object>(
+			         user, HttpStatus.FOUND);
+		} catch (Exception e) {
+			 return new ResponseEntity<Object>(
+					 null , HttpStatus.NOT_FOUND);
+		}
 	}
+	
 	
 	@CrossOrigin(origins = "http://localhost:4200")
 	@GetMapping(path = "/allproperties")
-	public @ResponseBody Iterable<Property> getAllPropertyList() {
-		return propertyService.getAllProperty();
+	public ResponseEntity<Object>  getAllPropertyList(){
+		try {
+			Iterable<Property> propList =  propertyService.getAllProperty();
+			return new ResponseEntity<Object>(
+			         propList, HttpStatus.FOUND);
+		} catch (PropertyException e) {
+			return new ResponseEntity<Object>(
+					 "Some error occured: "+e.getStackTrace() , HttpStatus.BAD_REQUEST);
+		}
 	}
+	
 	
 	@CrossOrigin(origins = "http://localhost:4200")
 	@GetMapping(value= "/getproperty/{propId}")
-	public @ResponseBody Optional<Property> getPropertyById(@PathVariable("propId") String id) {
-		return propertyService.getPropertyById(Integer.parseInt(id));
+	public ResponseEntity<Object> getPropertyById(@PathVariable("propId") String id) {
+		try {
+			Optional<Property> prop = propertyService.getPropertyById(Integer.parseInt(id));
+			 return new ResponseEntity<Object>(
+			         prop, HttpStatus.FOUND);
+		} catch (Exception e) {
+			 return new ResponseEntity<Object>(
+					 "Some error occured: "+e.getStackTrace() , HttpStatus.BAD_REQUEST);
+		}
+		
 	}
 
+	
 	@CrossOrigin(origins = "http://localhost:4200")
 	@GetMapping(value= "/getpropertybytype/{propType}")
-	public @ResponseBody List<Property> getPropertyByPropType(@PathVariable("propType") String propType) {
-		return propertyService.getPropertyByType(propType);
+	public ResponseEntity<Object> getPropertyByPropType(@PathVariable("propType") String propType) {
+		try {
+			List<Property> propList = propertyService.getPropertyByType(propType);
+			 return new ResponseEntity<Object>(
+			         propList, HttpStatus.FOUND);
+		} catch (Exception e) {
+			 return new ResponseEntity<Object>(
+					 "Some error occured: "+e.getStackTrace() , HttpStatus.BAD_REQUEST);
+		}
 	}
 
+	
 	@CrossOrigin(origins = "http://localhost:4200")
 	@PostMapping("/addproperty")
-	Property newProperty(@RequestBody Property newProperty) {
-		return propertyService.addProperty(newProperty);
+	public ResponseEntity<Object> newProperty(@RequestBody Property newProperty) {
+		try {
+			Property newProp = propertyService.addProperty(newProperty);
+			 return new ResponseEntity<Object>(
+			         newProp, HttpStatus.CREATED);
+		} catch (Exception e) {
+			 return new ResponseEntity<Object>(
+					 "Some error occured: "+e.getStackTrace() , HttpStatus.BAD_REQUEST);
+		}
 	}
 
+	
 	@CrossOrigin(origins = "http://localhost:4200")
 	@PostMapping("/deleteproperty/{propId}")
-	public void deleteProperty(@PathVariable("propId") int propId) {
-		propertyService.deleteProperty(propId);
+	public ResponseEntity<Object> deleteProperty(@PathVariable("propId") int propId) {
+		try {
+			propertyService.deleteProperty(propId);
+			 return new ResponseEntity<Object>(
+			         "The Record has been deleted!", HttpStatus.ACCEPTED);
+		} catch (Exception e) {
+			 return new ResponseEntity<Object>(
+					 "ID dosen't exist. Deletion failed!" , HttpStatus.NOT_FOUND);
+		}
 	}
 
+	
 	@CrossOrigin(origins = "http://localhost:4200")
 	@PostMapping("/addinterest")
-	public void addInterest(@RequestBody InterestLog interest) {
-		userService.addInterest(interest);
+	public ResponseEntity<Object> addInterest(@RequestBody InterestLog interest) {
+		try {
+			userService.addInterest(interest);
+			 return new ResponseEntity<Object>(
+			         "The Record has been added!", HttpStatus.CREATED);
+		} catch (Exception e) {
+			 return new ResponseEntity<Object>(
+					 "Some error occured: "+e.getStackTrace() , HttpStatus.BAD_REQUEST);
+		}
 	}
 
+	
 	@CrossOrigin(origins = "http://localhost:4200")
 	@GetMapping(path = "/allinterest")
 	public @ResponseBody Iterable<InterestLog> getAllInterestList() {

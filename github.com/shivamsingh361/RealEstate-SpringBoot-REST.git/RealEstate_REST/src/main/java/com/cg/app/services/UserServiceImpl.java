@@ -11,6 +11,7 @@ import com.cg.app.dao.InterestListRepository;
 import com.cg.app.dao.UserRepository;
 import com.cg.app.dto.InterestLog;
 import com.cg.app.dto.User;
+import com.cg.app.exceptions.UserException;
 @Service
 public class UserServiceImpl implements UserService {
 	@Autowired
@@ -18,32 +19,46 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	InterestListRepository intrestRepo;
 	@Override
-	public User addUser(User user) {
-		userRepo.save(user);
-		return null;
-	}
-
-	@Override
-	public User updateUser(User user) {
-		userRepo.save(user);
-		return null;
-	}
-
-	@Override
-	public List<String> getAllUserIds() {
-		List<String> userIds = new ArrayList<String>();
-		for(User user: userRepo.findAll()) {
-			userIds.add(user.getUserId());
+	public User addUser(User user) throws UserException {
+		try {
+			return userRepo.save(user);
+		} catch (Exception e) {
+			throw new UserException("An Error occured while adding new User!: ",e);
 		}
-		return userIds;
 	}
 
 	@Override
-	public User checkCredentials(String id, String pass) {
-		if(userRepo.existsById(id)) {
-			Optional<User> user = userRepo.findById(id);
-			if(user.get().getPass().equals(pass))
-				return user.get();
+	public User updateUser(User user) throws UserException {
+		try {
+			return userRepo.save(user);
+		} catch (Exception e) {
+			throw new UserException("An Error occured while updating User!: ",e);
+		}
+	}
+
+	@Override
+	public List<String> getAllUserIds() throws UserException {
+		List<String> userIds = new ArrayList<String>();
+		try {
+			for(User user: userRepo.findAll()) {
+				userIds.add(user.getUserId());
+			}
+			return userIds;
+		} catch (Exception e) {
+			throw new UserException("An Error occured while fetching User by ID. : ",e);
+		}
+	}
+
+	@Override
+	public User checkCredentials(String id, String pass) throws UserException {
+		try {
+			if(userRepo.existsById(id)) {
+				Optional<User> user = userRepo.findById(id);
+				if(user.get().getPass().equals(pass))
+					return user.get();
+			}
+		} catch (Exception e) {
+			throw new UserException("An Error occured while checking credentials.: ",e);
 		}
 		return null;
 	}
@@ -59,11 +74,11 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void deleteUser(String userId) {
+	public void deleteUser(String userId) throws UserException {
 		try {
 			userRepo.deleteById(userId);
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw new UserException("An Error occured while deleting User!: ",e);
 		}
 	}
 
