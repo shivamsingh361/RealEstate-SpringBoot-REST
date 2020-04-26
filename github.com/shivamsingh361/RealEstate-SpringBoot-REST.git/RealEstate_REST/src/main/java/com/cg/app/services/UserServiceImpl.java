@@ -11,7 +11,9 @@ import com.cg.app.dao.InterestListRepository;
 import com.cg.app.dao.UserRepository;
 import com.cg.app.dto.InterestLog;
 import com.cg.app.dto.User;
+import com.cg.app.exceptions.UserAlreadyExistException;
 import com.cg.app.exceptions.UserException;
+import com.cg.app.exceptions.UserNotFoundException;
 @Service
 public class UserServiceImpl implements UserService {
 	@Autowired
@@ -19,7 +21,9 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	InterestListRepository intrestRepo;
 	@Override
-	public User addUser(User user) throws UserException {
+	public User addUser(User user) throws UserException, UserAlreadyExistException {
+		if(userRepo.existsById(user.getUserId()))
+			throw new UserAlreadyExistException("Entered UserID already register!");
 		try {
 			return userRepo.save(user);
 		} catch (Exception e) {
@@ -29,11 +33,10 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User updateUser(User user) throws UserException {
-		try {
+		if(userRepo.existsById(user.getUserId()))
 			return userRepo.save(user);
-		} catch (Exception e) {
-			throw new UserException("An Error occured while updating User!: ",e);
-		}
+		else
+			throw new UserException("Invalid user Object received! Can't Update.");
 	}
 
 	@Override
@@ -51,16 +54,15 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User checkCredentials(String id, String pass) throws UserException {
-		try {
-			if(userRepo.existsById(id)) {
-				Optional<User> user = userRepo.findById(id);
-				if(user.get().getPass().equals(pass))
-					return user.get();
-			}
-		} catch (Exception e) {
-			throw new UserException("An Error occured while checking credentials.: ",e);
+		if(userRepo.existsById(id)) {
+			Optional<User> user = userRepo.findById(id);
+			if(user.get().getPass().equals(pass))
+				return user.get();
+			else
+				throw new UserNotFoundException("Invalid Credentails");
 		}
-		return null;
+		else
+			throw new UserNotFoundException("UserId Dosen't Exist");
 	}
 
 	@Override

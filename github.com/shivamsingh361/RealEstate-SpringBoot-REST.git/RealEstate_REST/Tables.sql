@@ -33,3 +33,12 @@ user_id varchar(50) NOT NULL,
 intrested_city varchar(40) NOT NULL,
 prop_id int(10) NOT NULL);
 
+
+	
+CREATE TABLE property_image(
+   id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+   name VARCHAR(100) NOT NULL,
+   type VARCHAR(10) NOT NULL,
+   pic BLOB NOT NULL,
+   prop_id BIGINT NOT NULL
+);
